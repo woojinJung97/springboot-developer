@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/travel_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: travel_user
+    password: travel1234
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.backend.springbootdeveloper.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+jwt:
+  issuer: travel-api
+  secretKey: my-secret-key-for-jwt-token
