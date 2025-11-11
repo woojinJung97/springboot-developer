@@ -1,0 +1,54 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/travel_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: travel_user
+    password: travel1234
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.backend.springbootdeveloper.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+jwt:
+  issuer: travel-api
+  secretKey: "my-super-secret-key-for-jwt-token-should-be-at-least-32bytes!"
+
+#spring:
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    # MODE=MySQL: MySQL 문법 호환, DATABASE_TO_UPPER=FALSE: 소문자 테이블/컬럼 유지
+#    url: jdbc:h2:mem:travel_db;MODE=MySQL;DATABASE_TO_UPPER=FALSE
+#    username: sa
+#    password:
+#  h2:
+#    console:
+#      enabled: true
+#      path: /h2-console
+#  sql:
+#    # schema.sql, data.sql 강제로 실행 (원하시면 제거 가능)
+#    init:
+#      mode: always
+#
+#mybatis:
+#  mapper-locations: classpath:/mapper/**/*.xml
+#  type-aliases-package: com.backend.springbootdeveloper.domain
+#  configuration:
+#    map-underscore-to-camel-case: true
+#
+## 다른 설정들은 그대로 유지
+#jwt:
+#  issuer: travel-api
+#  secretKey: "my-super-secret-key-for-jwt-token-should-be-at-least-32bytes!"
+
+train:
+  api:
+    key: "zym+6Z5bZv5y+1pRKA6KIhq9hQEjFupF70VLQmjphMjNE3vX2sAIJmXLX7BTwUChRqhjm7ESXrnqRXJ3/pfwxw=="
+
+logging:
+  level:
+    root: info
+    org.springframework.web: debug
+    org.springframework.jdbc: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
