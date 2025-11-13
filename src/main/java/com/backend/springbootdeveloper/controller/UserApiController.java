@@ -12,6 +12,7 @@ import com.backend.springbootdeveloper.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -107,4 +107,13 @@ public class UserApiController {
 
         return ResponseEntity.ok(ApiResponse.success("내 정보 변경 완료", response));
     }
+
+    // 회원탈퇴
+    @DeleteMapping("/api/users/myhome/{userId}")
+    public ResponseEntity<ApiResponse<?>> deleteMyHome(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long userId) {
+        userService.deleteUser(user, userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

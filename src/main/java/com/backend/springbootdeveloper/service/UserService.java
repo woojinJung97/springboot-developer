@@ -80,4 +80,9 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
         return new AddUserResponse(updatedUser);
     }
+
+    @Transactional
+    public void deleteUser(CustomUserDetails user, Long userId) {
+        userMapper.deleteUser(user, userId);
+    }
 }

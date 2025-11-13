@@ -67,7 +67,6 @@ public class TrainApiService {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response);
             JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
-
             if (itemsNode.isArray()) {
                 for (JsonNode itemNode : itemsNode) {
                     int currentTrainNo = itemNode.path("trainno").asInt();
@@ -75,8 +74,6 @@ public class TrainApiService {
                         return mapper.treeToValue(itemNode, TrainItemDto.class);
                     }
                 }
-            } else {
-                System.out.println("?? : " + itemsNode);
             }
 
             return null;

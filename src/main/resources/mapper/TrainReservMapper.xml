@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.backend.springbootdeveloper.mapper.TrainReservMapper">
+    <insert id="reservTrain" parameterType="com.backend.springbootdeveloper.dto.TrainReservDto" useGeneratedKeys="true" keyProperty="trainResvId">
+        INSERT INTO train_reservations (train_resv_id, user_id, train_no, train_grade, depart_station, arrive_station, dep_date, arr_date, price, promotion, reserv_state, reg_date)
+            VALUES (#{trainResvId}, #{userId}, #{trainNo}, #{trainGrade}, #{departStation}, #{arriveStation}, #{depDate}, #{arrDate}, #{price}, #{promotion}, #{reservState}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <insert id="insertTraintSeat">
+        INSERT INTO train_seats (train_resv_id, seat_info)
+            VALUES (#{trainResvId}, #{seatInfo})
+    </insert>
+</mapper>

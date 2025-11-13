@@ -22,4 +22,6 @@ public interface UserMapper {
     boolean existsByNickname(String nickname);
 
     void updateMyHome(@Param("user")CustomUserDetails userDetails, @Param("request") AddUserRequest request);
+
+    void deleteUser(CustomUserDetails user, Long userId);
 }
