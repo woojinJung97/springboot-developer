@@ -3,9 +3,7 @@ package com.backend.springbootdeveloper.controller;
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.config.jwt.TokenProvider;
 import com.backend.springbootdeveloper.domain.User;
-import com.backend.springbootdeveloper.dto.AddUserRequest;
-import com.backend.springbootdeveloper.dto.AddUserResponse;
-import com.backend.springbootdeveloper.dto.ApiResponse;
+import com.backend.springbootdeveloper.dto.*;
 import com.backend.springbootdeveloper.mapper.UserMapper;
 import com.backend.springbootdeveloper.service.RefreshTokenService;
 import com.backend.springbootdeveloper.service.UserService;
@@ -114,6 +112,14 @@ public class UserApiController {
         userService.deleteUser(user, userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    // 나의 예약내역 확인
+    @GetMapping("/api/users/reserv")
+    public ResponseEntity<ApiResponse<?>> getReserved(@AuthenticationPrincipal CustomUserDetails user) {
+        List<TrainReservResponseDto> reservDto = userService.getMyReserv(user);
+
+        return ResponseEntity.ok(ApiResponse.success("예약정보 확인",  reservDto));
     }
 
 }

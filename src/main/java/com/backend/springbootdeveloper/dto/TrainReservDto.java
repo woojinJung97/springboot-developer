@@ -1,5 +1,6 @@
 package com.backend.springbootdeveloper.dto;
 
+import com.backend.springbootdeveloper.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

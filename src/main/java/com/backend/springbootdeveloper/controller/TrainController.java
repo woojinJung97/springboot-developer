@@ -24,11 +24,9 @@ public class TrainController {
 
     // 기차 조회
     @GetMapping("/search")
-    public ResponseEntity<List<TrainItemDto>> searchTrain(
-            @RequestParam String depPlaceId,
-            @RequestParam String arrPlaceId,
-            @RequestParam String depPlandTime) {
-
+    public ResponseEntity<List<TrainItemDto>> searchTrain(@RequestParam String depPlaceId,
+                                                          @RequestParam String arrPlaceId,
+                                                          @RequestParam String depPlandTime) {
         List<TrainItemDto> trains = trainApiService.getTrainData(depPlaceId, arrPlaceId, depPlandTime);
         return ResponseEntity.ok(trains);
     }
@@ -44,6 +42,7 @@ public class TrainController {
         return ResponseEntity.ok(ApiResponse.success("열차 상세 조회 성공", dto));
     }
 
+    // 기차 예약
     @PostMapping("/reserv/train")
     public ResponseEntity<ApiResponse<TrainReservDto>> reservTrain(@AuthenticationPrincipal CustomUserDetails user, @RequestBody TrainReservRequest trainReservDto) {
         TrainReservDto response = trainReservationService.reservTrain(user, trainReservDto);

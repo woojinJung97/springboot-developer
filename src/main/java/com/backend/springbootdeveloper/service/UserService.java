@@ -5,11 +5,18 @@ import com.backend.springbootdeveloper.config.jwt.TokenProvider;
 import com.backend.springbootdeveloper.domain.User;
 import com.backend.springbootdeveloper.dto.AddUserRequest;
 import com.backend.springbootdeveloper.dto.AddUserResponse;
+import com.backend.springbootdeveloper.dto.TrainReservDto;
+import com.backend.springbootdeveloper.dto.TrainReservResponseDto;
+import com.backend.springbootdeveloper.mapper.TrainReservMapper;
 import com.backend.springbootdeveloper.mapper.UserMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +26,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final TrainReservMapper trainReservMapper;
 
     public void signup(AddUserRequest dto) {
         if (userMapper.existsByEmail(dto.getEmail())) {
@@ -84,5 +92,11 @@ public class UserService {
     @Transactional
     public void deleteUser(CustomUserDetails user, Long userId) {
         userMapper.deleteUser(user, userId);
+    }
+
+    public List<TrainReservResponseDto> getMyReserv(CustomUserDetails user) {
+        Long userId = user.getUserId();
+
+        return userMapper.getMyReserv(userId);
     }
 }

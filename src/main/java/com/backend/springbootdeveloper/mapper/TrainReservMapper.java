@@ -9,4 +9,5 @@ public interface TrainReservMapper {
     void reservTrain(TrainReservDto reservDto);
 
     void insertTraintSeat(@Param("trainResvId")  Long trainResvId,@Param("seatInfo")  String seatInfo);
+    
 }

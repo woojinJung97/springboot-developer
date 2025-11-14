@@ -60,4 +60,28 @@
         DELETE FROM users
          WHERE user_id = #{userId}
     </delete>
+
+    <!--  예약 조회  -->
+    <select id="getMyReserv" resultType="com.backend.springbootdeveloper.dto.TrainReservResponseDto">
+        select us.user_id,
+               us.email,
+               us.nickname,
+               us.rate,
+               train.train_grade,
+               train.depart_station,
+               train.arrive_station,
+               train.dep_date,
+               train.arr_date,
+               train.price,
+               train.promotion,
+               train.reserv_state,
+               train.reg_date,
+               GROUP_CONCAT(seat.seat_info) as seatInfoStr
+        from users us
+                 left outer join train_reservations train on us.user_id = train.user_id
+                 left outer join train_seats seat on train.train_resv_id = seat.train_resv_id
+        where us.user_id = #{userId}
+        group by train.train_resv_id
+        order by train.reg_date
+    </select>
 </mapper>
