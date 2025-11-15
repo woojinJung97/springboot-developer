@@ -1,80 +1,100 @@
 package com.backend.springbootdeveloper.config.jwt;
 
+import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.domain.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.backend.springbootdeveloper.mapper.UserMapper;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.util.Collections;
+import java.security.Key;
 import java.util.Date;
-import java.util.Set;
 
+import static io.jsonwebtoken.Jwts.*;
+
+@Component
 @RequiredArgsConstructor
-@Service
 public class TokenProvider {
 
-    private final JwtProperties jwtProperties;
+    private final UserMapper userMapper;
 
-    public String generateToken(User user, Duration expiredAt) {
-        Date now = new Date();
-        return makeToken(new Date(now.getTime() + expiredAt.toMillis()), user);
+    @Value("${jwt.secretKey}")
+    private String secretKey;
+
+    @Value("${jwt.issuer}")
+    private String issuer;
+
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    private String makeToken(Date expiry, User user) {
+    // AccessToken 생성
+    public String generateAccessToken(User user) {
         Date now = new Date();
+        Date expiry = new Date(now.getTime() + 1000L * 60 * 120); // 2시간
 
-        return Jwts.builder()
-                .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // 헤더 type: JWT
-                .setIssuer(jwtProperties.getIssuer())
-                .setIssuedAt(now) // 내용 iat : 현재 시간
-                .setExpiration(expiry) // 내용 exp : expiry 멤버 변수값
-                .setSubject(user.getEmail()) // 내용 sub : 유저 이메일
-                .claim("id", user.getUserId()) // 클레임 id : 유저 ID
-                // 서명 : 비밀값과 함께 해시값을 HS256 방식으로 암호화
-                .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
+        return builder()
+                .setIssuer(issuer)
+                .setSubject(user.getEmail())
+                .claim("id", user.getUserId())
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
 
-    // JWT 토큰 유효성 검증 메서드
-    public boolean validToken(String token) {
-        try{
-            Jwts.parser()
-                    .setSigningKey(jwtProperties.getSecretKey()) // 비밀값으로 복호화
-                    .parseClaimsJws(token);
+    // RefreshToken 생성
+    public String generateRefreshToken(User user) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + 1000L * 60 * 60 * 24 * 14); // 2주
 
+        return builder()
+                .setIssuer(issuer)
+                .setSubject(user.getEmail())
+                .claim("id", user.getUserId())
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(SignatureAlgorithm.HS256, key)
+                .compact();
+    }
+
+    // 토큰 유효성 검증
+    public boolean validToken(String token) {
+        try {
+            if (token == null) return false;
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-    // 토큰 기반으로 인증 정보를 가져오는 메서드
+    // JWT에서 Authentication 객체 추출 ( 여기서 CustomUserDetails 생성)
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+        String email = claims.getSubject();
 
-        return new UsernamePasswordAuthenticationToken(new org.springframework.security.core.userdetails.User(claims.getSubject(),
-                "", authorities), token, authorities);
+        User user = userMapper.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다: " + email));
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    // 토큰 기반으로 유저 ID를 가져오는 메서드
-    public Long getUserId(String token) {
-        Claims claims = getClaims(token);
-        return claims.get("id", Long.class);
-    }
-
+    // JWT에서 사용자 정보 꺼내기
     private Claims getClaims(String token) {
-        return Jwts.parser() // 클레임 조회
-                .setSigningKey(jwtProperties.getSecretKey())
+        return Jwts.parser()
+                .setSigningKey(key)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
-
 }

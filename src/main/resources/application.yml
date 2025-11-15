@@ -13,4 +13,18 @@ mybatis:
 
 jwt:
   issuer: travel-api
-  secretKey: my-secret-key-for-jwt-token
+  secretKey: "my-super-secret-key-for-jwt-token-should-be-at-least-32bytes!"
+
+train:
+  api:
+    key: "zym+6Z5bZv5y+1pRKA6KIhq9hQEjFupF70VLQmjphMjNE3vX2sAIJmXLX7BTwUChRqhjm7ESXrnqRXJ3/pfwxw=="
+
+logging:
+  level:
+    root: info
+    org.springframework.web: debug
+    org.springframework.jdbc: debug
+    java.sql.Connection: debug
+    java.sql.Statement: debug
+    java.sql.PreparedStatement: debug
+    java.sql.ResultSet: debug

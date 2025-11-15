@@ -31,4 +31,19 @@
         }
     </select>
 
+    <!--  회원정보 수정  -->
+    <update id="updatedUser">
+        UPDATE users
+        <set>
+            <if test="dto.email != null">email = #{dto.email},</if>
+            <if test="dto.nickname != null">nickname = #{dto.nickname},</if>
+            <if test="dto.password != null">password = #{dto.password},</if>
+        </set>
+        WHERE user_id = #{userDetails.userId}
+    </update>
+
+    <delete id="deleteUser">
+        DELETE FROM users
+        WHERE user_id = #{userId}
+    </delete>
 </mapper>

@@ -5,8 +5,6 @@ import com.backend.springbootdeveloper.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-
 @RequiredArgsConstructor
 @Service
 public class TokenService {
@@ -15,15 +13,16 @@ public class TokenService {
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
 
+    // Refresh Token을 받아 Access Token 재발급
     public String createNewAccessToken(String refreshToken) throws IllegalAccessException {
-        if(!tokenProvider.validToken(refreshToken)) {
-            throw new IllegalAccessException("Unexpected token");
+        if (!tokenProvider.validToken(refreshToken)) {
+            throw new IllegalAccessException("유효하지 않은 토큰입니다.");
         }
 
+        // refresh_token 테이블에서 userId 조회
         Long userId = refreshTokenService.findByRefreshToken(refreshToken).getUserId();
         User user = userService.findById(userId);
 
-        return tokenProvider.generateToken(user, Duration.ofHours(2));
+        return tokenProvider.generateAccessToken(user);
     }
-
 }

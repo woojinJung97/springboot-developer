@@ -1,13 +1,16 @@
 package com.backend.springbootdeveloper.service;
 
+import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.config.jwt.TokenProvider;
-import com.backend.springbootdeveloper.domain.Role;
 import com.backend.springbootdeveloper.domain.User;
 import com.backend.springbootdeveloper.dto.AddUserRequest;
+import com.backend.springbootdeveloper.dto.UserRequestDto;
+import com.backend.springbootdeveloper.dto.UserResponseDto;
 import com.backend.springbootdeveloper.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 
@@ -48,8 +51,8 @@ public class UserService {
         }
 
         // Access Token & Refresh Token 발급
-        String accessToken = tokenProvider.generateToken(user, Duration.ofHours(2));
-        String refreshToken = tokenProvider.generateToken(user, Duration.ofDays(14));
+        String accessToken = tokenProvider.generateAccessToken(user);
+        String refreshToken = tokenProvider.generateAccessToken(user);
 
         // Refresh Token 저장
         refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
@@ -59,11 +62,32 @@ public class UserService {
 
     public User findById(Long userId) {
         return userMapper.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
     }
 
     public User findByEmail(String email) {
         return userMapper.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    }
+
+    public UserResponseDto getMyHome(Long userId) {
+        User user = userMapper.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        return new UserResponseDto(user);
+    }
+
+    @Transactional
+    public UserResponseDto updatedUser(CustomUserDetails userDetails, UserRequestDto dto) {
+        userMapper.updatedUser(userDetails, dto);
+
+        User updateUser = userMapper.findById(userDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        return new UserResponseDto(updateUser);
+    }
+
+    public void deleteUser(CustomUserDetails user, Long userId) {
+        userMapper.deleteUser(user, userId);
     }
 }

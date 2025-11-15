@@ -1,9 +1,12 @@
 package com.backend.springbootdeveloper.controller;
 
+import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.config.jwt.TokenProvider;
 import com.backend.springbootdeveloper.domain.User;
 import com.backend.springbootdeveloper.dto.AddUserRequest;
 import com.backend.springbootdeveloper.dto.ApiResponse;
+import com.backend.springbootdeveloper.dto.UserRequestDto;
+import com.backend.springbootdeveloper.dto.UserResponseDto;
 import com.backend.springbootdeveloper.mapper.UserMapper;
 import com.backend.springbootdeveloper.service.RefreshTokenService;
 import com.backend.springbootdeveloper.service.UserService;
@@ -12,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -43,8 +47,8 @@ public class UserApiController {
         }
 
         // JWT 생성
-        String accessToken = tokenProvider.generateToken(user, Duration.ofHours(2));
-        String refreshToken = tokenProvider.generateToken(user, Duration.ofDays(14));    // 14일짜리 Refresh Token
+        String accessToken = tokenProvider.generateAccessToken(user);
+        String refreshToken = tokenProvider.generateAccessToken(user);
 
         // DB에 Refresh Token 저장
         refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
@@ -86,6 +90,31 @@ public class UserApiController {
         boolean exists = userMapper.existsByNickname(nickname);
         return ResponseEntity.ok(Map.of("available", !exists,
                 "message", exists ? "이미 사용중인 닉네임입니다." : "사용 가능한 닉네임입니다."));
+    }
+
+    // 내 정보 조회
+    @GetMapping("/api/users/myhome")
+    public ResponseEntity<ApiResponse<UserResponseDto>> getMyHome(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        UserResponseDto result = userService.getMyHome(userId);
+
+        return ResponseEntity.ok(ApiResponse.success("회원 정보 조회 성공", result));
+    }
+
+    // 회원정보 수정
+    @PatchMapping("/api/users/myhome")
+    public ResponseEntity<ApiResponse<UserResponseDto>> updatedUser(@AuthenticationPrincipal CustomUserDetails user,@RequestBody UserRequestDto dto) {
+        UserResponseDto result = userService.updatedUser(user, dto);
+        System.out.println(result);
+        return ResponseEntity.ok(ApiResponse.success("회원정보 수정 완료", result));
+    }
+
+    // 회원 탈퇴
+    @DeleteMapping("/api/users/myhome/{userId}")
+    public ResponseEntity<ApiResponse<?>> deleteUser(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long userId) {
+        userService.deleteUser(user, userId);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

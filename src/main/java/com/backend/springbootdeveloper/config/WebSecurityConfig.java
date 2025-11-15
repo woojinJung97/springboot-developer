@@ -1,5 +1,6 @@
 package com.backend.springbootdeveloper.config;
 
+import com.backend.springbootdeveloper.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private final UserDetailsService userService;
+    private final TokenProvider tokenProvider;
 
     // 스프링 시큐리티 기능 비활성화
     @Bean
@@ -46,9 +48,12 @@ public class WebSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // ✅ 허용할 URL 지정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers( "/login", "/api/login", "/api/signup" , "/signup", "/user", "/css/**", "/js/**", "/api/check-email", "/api/check-nickname").permitAll()
+                        .requestMatchers( "/login", "/api/login", "/api/signup" , "/api/signup", "/user", "/css/**", "/js/**", "/api/check-email", "/api/check-nickname").permitAll()
+                        .requestMatchers("/api/train/**", "/api/users/**").permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
