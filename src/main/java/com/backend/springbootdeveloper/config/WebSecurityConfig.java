@@ -48,7 +48,7 @@ public class WebSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // ✅ 허용할 URL 지정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers( "/login", "/api/login", "/api/signup" , "/api/signup", "/user", "/css/**", "/js/**", "/api/check-email", "/api/check-nickname").permitAll()
+                        .requestMatchers( "/login", "/api/login", "/api/signup" , "/api/signup", "/user", "/css/**", "/js/**", "/api/check-email", "/api/check-nickname", "/api/**").permitAll()
                         .requestMatchers("/api/train/**", "/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -65,6 +65,7 @@ public class WebSecurityConfig {
         // 허용할 Origin 지정
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
         config.setAllowedHeaders(List.of("*"));
 
         // 쿠키 세션 포함 요청 허용

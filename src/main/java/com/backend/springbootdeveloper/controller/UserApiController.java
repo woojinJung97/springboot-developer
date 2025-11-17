@@ -10,11 +10,16 @@ import com.backend.springbootdeveloper.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +36,9 @@ public class UserApiController {
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
+
+    @Value("${app.secure-cookie:false}")
+    private boolean secureCookie;
 
     @PostMapping("/api/login")
     public ResponseEntity<?> login(@RequestBody Map<String, Object> request) throws IllegalAccessException {
@@ -50,21 +58,72 @@ public class UserApiController {
         // DB에 Refresh Token 저장
         refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
 
+        boolean isProd = secureCookie;
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(isProd)              // 개발(HTTP)이면 false, 프로덕션(HTTPS)이면 true
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite(isProd ? "None" : "Lax") // 로컬 테스트 시 Lax 권장
+                .build();
+
         // 응답 구성
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Login Success");
         response.put("user", user.getEmail());
         response.put("accessToken", accessToken);
-        response.put("refreshToken", refreshToken);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/api/me")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Object principal = authentication.getPrincipal();
+        User user = null;
+
+        if (principal instanceof User) {
+            user = (User) principal;
+        } else if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            user = userService.findByEmail(username);
+        } else if (principal instanceof String) {
+            String username = (String) principal;
+            user = userService.findByEmail(username);
+        }
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "user", Map.of(
+                        "email", user.getEmail(),
+                        "nickname", user.getNickname()
+                )
+        ));
+    }
+
+    @PostMapping("/api/logout")
+    public ResponseEntity<ApiResponse> logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
 
-        return "redirect:/login";
+        // HttpOnly refresh cookie 삭제(만료)
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true) // HTTPS 환경이면 true
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok(new ApiResponse(200, "Logout success", null));
     }
     
     @PostMapping("/api/signup")
