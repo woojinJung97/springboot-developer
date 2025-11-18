@@ -64,7 +64,7 @@ public class WebSecurityConfig {
 
         // 허용할 Origin 지정
         config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
         config.setAllowedHeaders(List.of("*"));
 

@@ -83,7 +83,13 @@ public class UserService {
 
     @Transactional
     public AddUserResponse updateMyHome(CustomUserDetails userDetails, AddUserRequest request) {
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            request.setPassword(encodedPassword);
+        }
+
         userMapper.updateMyHome(userDetails, request);
+
         User updatedUser = userMapper.findById(userDetails.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
         return new AddUserResponse(updatedUser);
