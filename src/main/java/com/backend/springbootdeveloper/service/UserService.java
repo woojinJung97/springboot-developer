@@ -96,8 +96,8 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(CustomUserDetails user, Long userId) {
-        userMapper.deleteUser(user, userId);
+    public void deleteUser(CustomUserDetails user) {
+        userMapper.deleteUser(user);
     }
 
     public List<TrainReservResponseDto> getMyReserv(CustomUserDetails user) {

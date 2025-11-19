@@ -110,7 +110,7 @@ public class UserApiController {
     }
 
     @PostMapping("/api/logout")
-    public ResponseEntity<ApiResponse> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
 
         // HttpOnly refresh cookie 삭제(만료)
@@ -123,7 +123,7 @@ public class UserApiController {
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok(new ApiResponse(200, "Logout success", null));
+        return ResponseEntity.ok(new ApiResponse<>(200, "Logout success", null));
     }
     
     @PostMapping("/api/signup")
@@ -166,9 +166,9 @@ public class UserApiController {
     }
 
     // 회원탈퇴
-    @DeleteMapping("/api/users/myhome/{userId}")
-    public ResponseEntity<ApiResponse<?>> deleteMyHome(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long userId) {
-        userService.deleteUser(user, userId);
+    @DeleteMapping("/api/users/myhome")
+    public ResponseEntity<ApiResponse<?>> deleteMyHome(@AuthenticationPrincipal CustomUserDetails user) {
+        userService.deleteUser(user);
 
         return ResponseEntity.noContent().build();
     }

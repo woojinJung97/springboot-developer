@@ -1,5 +1,6 @@
 package com.backend.springbootdeveloper.service;
 
+import com.backend.springbootdeveloper.dto.StationRequestDto;
 import com.backend.springbootdeveloper.dto.TrainItemDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,6 +84,31 @@ public class TrainApiService {
         }
     }
 
+    public List<StationRequestDto> searchTrainStation() {
+        String cityCode = "11";
+        String encodedKey = URLEncoder.encode(apiKey.trim(), StandardCharsets.UTF_8);
+        String url = "https://apis.data.go.kr/1613000/TrainInfoService/getCtyAcctoTrainSttnList"
+                + "?serviceKey=" + encodedKey
+                + "&cityCode=" + cityCode
+                + "&numOfRows=10&pageNo=1&_type=json";
+
+        try {
+            String response = new RestTemplate().getForObject(new URI(url), String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+            JsonNode items = root.path("response").path("body").path("items").path("item");
+
+            List<StationRequestDto> result = new ArrayList<>();
+            for (JsonNode node : items) {
+                StationRequestDto dto = mapper.treeToValue(node, StationRequestDto.class);
+                result.add(dto);
+            }
+
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 
 

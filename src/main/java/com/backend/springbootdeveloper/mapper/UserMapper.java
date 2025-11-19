@@ -25,7 +25,7 @@ public interface UserMapper {
 
     void updateMyHome(@Param("user") CustomUserDetails userDetails, @Param("request") AddUserRequest request);
 
-    void deleteUser(CustomUserDetails user, Long userId);
+    void deleteUser(CustomUserDetails user);
 
     List<TrainReservResponseDto> getMyReserv(@Param("userId") Long user);
 

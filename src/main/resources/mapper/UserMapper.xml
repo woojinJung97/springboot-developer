@@ -42,7 +42,15 @@
 
     <!--  내 정보 조회  -->
     <select id="getMyHome" parameterType="long" resultType="com.backend.springbootdeveloper.domain.User">
-        SELECT * FROM users WHERE user_id = #{userId}
+        SELECT
+            user_id,
+            email,
+            nickname,
+            rate,
+            role,
+            DATE_FORMAT(reg_date, '%Y-%m-%d') as reg_date
+        FROM users
+        WHERE user_id = #{userId}
     </select>
 
     <!--  내 정보 수정  -->

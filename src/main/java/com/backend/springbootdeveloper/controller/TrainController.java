@@ -1,10 +1,7 @@
 package com.backend.springbootdeveloper.controller;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
-import com.backend.springbootdeveloper.dto.ApiResponse;
-import com.backend.springbootdeveloper.dto.TrainItemDto;
-import com.backend.springbootdeveloper.dto.TrainReservDto;
-import com.backend.springbootdeveloper.dto.TrainReservRequest;
+import com.backend.springbootdeveloper.dto.*;
 import com.backend.springbootdeveloper.service.TrainApiService;
 import com.backend.springbootdeveloper.service.TrainReservationService;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +45,13 @@ public class TrainController {
         TrainReservDto response = trainReservationService.reservTrain(user, trainReservDto);
 
         return ResponseEntity.ok(ApiResponse.success("기차 예약이 완료되었습니다.", response));
+    }
+
+    // 기차역 조회
+    @GetMapping("/train-station")
+    public ResponseEntity<ApiResponse<List<StationRequestDto>>> searchTrainStation() {
+        List<StationRequestDto> result = trainApiService.searchTrainStation();
+
+        return ResponseEntity.ok(ApiResponse.success("기차역 조회 성공", result));
     }
 }
