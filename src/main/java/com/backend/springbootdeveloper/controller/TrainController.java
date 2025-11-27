@@ -2,6 +2,7 @@ package com.backend.springbootdeveloper.controller;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.dto.*;
+import com.backend.springbootdeveloper.mapper.TrainReservMapper;
 import com.backend.springbootdeveloper.service.TrainApiService;
 import com.backend.springbootdeveloper.service.TrainReservationService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class TrainController {
 
     private final TrainApiService trainApiService;
     private final TrainReservationService trainReservationService;
+    private final TrainReservMapper trainReservMapper;
 
     // 기차 조회
     @GetMapping("/search")
@@ -53,5 +55,13 @@ public class TrainController {
         List<StationRequestDto> result = trainApiService.searchTrainStation();
 
         return ResponseEntity.ok(ApiResponse.success("기차역 조회 성공", result));
+    }
+
+    // 좌석 조회
+    @GetMapping("/seat-info")
+    public ResponseEntity<ApiResponse<List<String>>> getTrainSeatInfo(@RequestParam int trainno) {
+        List<String> result = trainReservationService.getSeatInfo(trainno);
+
+        return ResponseEntity.ok(ApiResponse.success("좌석 조회 성공", result));
     }
 }

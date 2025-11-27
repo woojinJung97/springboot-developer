@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,9 @@ public class TrainReservationService {
         reservDto.setRegDate(LocalDate.now());
 
         try {
+            if (trainReservMapper.checkSeatReserved(dto.getTrainno(), dto.getSeatInfo())) {
+                throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+            }
             trainReservMapper.reservTrain(reservDto);
 
             if (dto.getSeatInfo() != null) {
@@ -59,5 +63,12 @@ public class TrainReservationService {
         }
 
         return reservDto;
+    }
+
+
+    public List<String> getSeatInfo(int trainno) {
+        List<String> seats = trainReservMapper.getSeatInfo(trainno);
+
+        return seats;
     }
 }

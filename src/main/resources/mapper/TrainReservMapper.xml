@@ -13,4 +13,23 @@
         INSERT INTO train_seats (train_resv_id, seat_info)
             VALUES (#{trainResvId}, #{seatInfo})
     </insert>
+
+    <select id="getSeatInfo" parameterType="int" resultType="string">
+        select ts.seat_info,
+               tr.train_no
+        from train_seats ts
+        left outer join train_reservations tr on tr.train_resv_id = ts.train_resv_id
+        where tr.train_no = #{trainno}
+    </select>
+
+    <select id="checkSeatReserved" resultType="boolean">
+        select CASE WHEN COUNT(ts.seat_info) > 0 THEN TRUE ELSE FALSE END
+        from train_seats ts
+        left outer join train_reservations tr on tr.train_resv_id = ts.train_resv_id
+        where tr.train_no = #{trainno}
+        and ts.seat_info IN
+        <foreach collection="seatInfoList" item="seat" open="(" separator="," close=")">
+            #{seat}
+        </foreach>
+    </select>
 </mapper>
