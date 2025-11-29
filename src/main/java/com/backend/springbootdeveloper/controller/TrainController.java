@@ -21,11 +21,21 @@ public class TrainController {
 
     @GetMapping("/search")
     public ResponseEntity<List<TrainItemDto>> searchTrain(@RequestParam String depPlaceId,
-                                                                 @RequestParam String arrPlaceId,
-                                                                 @RequestParam String depPlandTime) {
+                                                         @RequestParam String arrPlaceId,
+                                                         @RequestParam String depPlandTime) {
         List<TrainItemDto> trains = trainApiService.getTrainData(depPlaceId, arrPlaceId, depPlandTime);
 
         return ResponseEntity.ok(trains);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ApiResponse<TrainItemDto>> detailTrain(@RequestParam String depPlaceId,
+                                                                 @RequestParam String arrPlaceId,
+                                                                 @RequestParam String depPlandTime,
+                                                                 @RequestParam int trainno) {
+        TrainItemDto result = trainApiService.getDetailTrain(trainno, depPlaceId, arrPlaceId, depPlandTime);
+
+        return ResponseEntity.ok(ApiResponse.success("열차 상세 조회 성공", result));
     }
 
 }

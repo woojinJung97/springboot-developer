@@ -49,4 +49,36 @@ public class TrainApiService {
             throw new RuntimeException("열차 조회 중 오류 발생" + e);
         }
     }
+
+    public TrainItemDto getDetailTrain(int trainno, String depPlaceId, String arrPlaceId, String depPlandTime) {
+        try {
+            String encodedKey = URLEncoder.encode(apiKey.trim(), StandardCharsets.UTF_8);
+
+            String url = "https://apis.data.go.kr/1613000/TrainInfoService/getStrtpntAlocFndTrainInfo"
+                    + "?serviceKey=" + encodedKey
+                    + "&depPlaceId=" + depPlaceId
+                    + "&arrPlaceId=" + arrPlaceId
+                    + "&depPlandTime=" + depPlandTime
+                    + "&_type=json";
+
+            // RestTemplate가 추가 인코딩 못 하도록 URI로 호출
+            String response = new RestTemplate().getForObject(new URI(url), String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+            JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+            if (itemsNode.isArray()) {
+                for (JsonNode itemNode : itemsNode) {
+                    int currentTrainNo = itemNode.path("trainno").asInt();
+                    if (currentTrainNo == trainno) {
+                        return mapper.treeToValue(itemNode, TrainItemDto.class);
+                    }
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }
