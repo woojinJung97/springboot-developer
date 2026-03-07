@@ -79,6 +79,10 @@ public class UserService {
 
     @Transactional
     public UserResponseDto updatedUser(CustomUserDetails userDetails, UserRequestDto dto) {
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            String encodedPassword = passwordEncoder.encode(dto.getPassword());
+            dto.setPassword(encodedPassword);
+        }
         userMapper.updatedUser(userDetails, dto);
 
         User updateUser = userMapper.findById(userDetails.getUserId())

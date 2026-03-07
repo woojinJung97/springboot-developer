@@ -1,6 +1,5 @@
 package com.backend.springbootdeveloper.domain;
 
-import jakarta.persistence.*;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

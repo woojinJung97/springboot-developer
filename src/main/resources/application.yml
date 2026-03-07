@@ -15,9 +15,16 @@ jwt:
   issuer: travel-api
   secretKey: "my-super-secret-key-for-jwt-token-should-be-at-least-32bytes!"
 
+app:
+  secure-cookie: ${APP_SECURE_COOKIE:false}
+
 train:
   api:
     key: "zym+6Z5bZv5y+1pRKA6KIhq9hQEjFupF70VLQmjphMjNE3vX2sAIJmXLX7BTwUChRqhjm7ESXrnqRXJ3/pfwxw=="
+
+toss:
+  secret-key: "test_sk_Z61JOxRQVE1Qmnlbe2d0VW0X9bAq"
+  base-url: "https://api.tosspayments.com/v1"
 
 logging:
   level:
