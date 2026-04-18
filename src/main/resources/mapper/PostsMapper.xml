@@ -6,19 +6,22 @@
 <mapper namespace="com.backend.springbootdeveloper.mapper.PostsMapper">
 
     <select id="getPostsList" parameterType="com.backend.springbootdeveloper.dto.PostsResponseDto">
-        select post_id,
-               user_id,
-               menu_id,
-               subcategory,
-               title,
-               content,
-               view_count,
-               comment_count,
-               created_at,
-               updated_at,
-               is_deleted
-          from posts
-         where 1 = 1
+        select p.post_id,
+               p.user_id,
+               p.post_type,
+               u.nickname,
+               p.title,
+               p.content,
+               p.category,
+               p.region,
+               p.view_count,
+               p.comment_count,
+               p.created_at,
+               p.updated_at,
+               p.is_deleted
+          from posts p
+          join users u on p.user_id = u.user_id
+         where is_deleted = false
         order by created_at desc
     </select>
 
@@ -26,10 +29,11 @@
         insert into posts
         (
             user_id,
-            menu_id,
-            subcategory,
+            post_type,
             title,
             content,
+            category,
+            region,
             view_count,
             comment_count,
             created_at,
@@ -37,31 +41,66 @@
             is_deleted
         ) values (
             #{userId},
-            #{menuId},
-            #{subcategory},
+            #{postType},
             #{title},
             #{content},
+            #{category},
+            #{region},
             #{viewCount},
             #{commentCount},
             now(),
             now(),
-            'N'
+            0
         )
     </insert>
 
     <select id="getPostsDetails" parameterType="long" resultType="com.backend.springbootdeveloper.dto.PostsResponseDto">
-        select post_id,
-               user_id,
-               menu_id,
-               subcategory,
-               title,
-               content,
-               view_count,
-               comment_count,
-               created_at,
-               updated_at,
-               is_deleted
-        from posts
-        where post_id = #{postId}
+        select p.post_id,
+               p.user_id,
+               p.post_type,
+               u.nickname,
+               p.title,
+               p.content,
+               p.category,
+               p.region,
+               p.view_count,
+               p.comment_count,
+               p.created_at,
+               p.updated_at,
+               p.is_deleted
+        from posts p
+        join users u on p.user_id = u.user_id
+        where p.post_id = #{postId}
+    </select>
+
+    <update id="increaseViewCount" parameterType="long">
+        UPDATE posts
+        SET view_count = view_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <insert id="createComment" parameterType="com.backend.springbootdeveloper.dto.CommentRequestDto">
+        insert into comments (
+            post_id,
+            user_id,
+            content,
+            created_at
+        ) values (
+            #{postId},
+            #{userId},
+            #{content},
+            now()
+        )
+    </insert>
+
+    <select id="getComment" resultType="com.backend.springbootdeveloper.dto.CommentResponseDto">
+        select c.comment_id,
+               c.post_id,
+               c.user_id,
+               c.content,
+               c.created_at
+          from comments c
+        where c.post_id = #{postId}
+        order by c.created_at desc
     </select>
 </mapper>

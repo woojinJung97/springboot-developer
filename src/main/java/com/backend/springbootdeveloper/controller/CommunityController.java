@@ -1,11 +1,10 @@
 package com.backend.springbootdeveloper.controller;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
-import com.backend.springbootdeveloper.dto.ApiResponse;
-import com.backend.springbootdeveloper.dto.PostsRequestDto;
-import com.backend.springbootdeveloper.dto.PostsResponseDto;
+import com.backend.springbootdeveloper.dto.*;
 import com.backend.springbootdeveloper.service.CommunityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -40,4 +39,19 @@ public class CommunityController {
         return ResponseEntity.ok(ApiResponse.success("게시글 상세페이지 조회 성공", result));
     }
 
+    // 댓글 쓰기
+    @PostMapping("/post/comment")
+    public ResponseEntity<ApiResponse<CommentResponseDto>> createComment(@AuthenticationPrincipal CustomUserDetails user, @RequestBody CommentRequestDto dto) {
+        CommentResponseDto result = communityService.createComment(user, dto);
+
+        return ResponseEntity.ok(ApiResponse.success("댓글 작성 완료", result));
+    }
+
+
+    @GetMapping("/post/{postId}/comments")
+    public ResponseEntity<ApiResponse<List<CommentResponseDto>>> getComment(@PathVariable Long postId) {
+        List<CommentResponseDto> result = communityService.getComment(postId);
+
+        return ResponseEntity.ok(ApiResponse.success("댓글 조회 성공", result));
+    }
 }

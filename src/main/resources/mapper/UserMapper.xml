@@ -7,8 +7,8 @@
 
     <!-- 회원가입-->
     <insert id="insertUser">
-        INSERT INTO users (email, password, nickname, rate, role, reg_date)
-        VALUES (#{email}, #{password}, #{nickname}, #{rate}, #{role}, NOW())
+        INSERT INTO users (email, password, nickname, created_at)
+        VALUES (#{email}, #{password}, #{nickname}, NOW())
     </insert>
     <!--유저 조회-->
     <select id="findByEmail" parameterType="string" resultType="com.backend.springbootdeveloper.domain.User">

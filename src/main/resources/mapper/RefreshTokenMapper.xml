@@ -13,7 +13,7 @@
 
     <!-- Refresh Token 조회 (토큰 문자열로 조회) -->
     <select id="findByToken" parameterType="string" resultType="com.backend.springbootdeveloper.domain.RefreshToken">
-        SELECT token_id, user_id, token, created_at
+        SELECT r, user_id, token, created_at
         FROM refresh_token
         WHERE token = #{token}
     </select>

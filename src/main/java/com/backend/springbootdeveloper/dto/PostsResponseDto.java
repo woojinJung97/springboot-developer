@@ -14,16 +14,20 @@ import java.util.Date;
 public class PostsResponseDto {
 
     private Long userId;
-    @JsonProperty("menu_id")
-    private int menuId;
+    private String nickname;
     private Long postId;
-    private String subcategory;
+    private String postType;
+    private String category;
     private String title;
     private String content;
     private int commentCount;
     private int viewCount;
+    private int likeCount;
+    private String region;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private Date updatedAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private Date createdAt;
-
+    @JsonProperty("isDeleted")
+    private boolean isDeleted;
 }
