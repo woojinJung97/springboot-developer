@@ -4,7 +4,6 @@ import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.dto.*;
 import com.backend.springbootdeveloper.service.CommunityService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -40,14 +39,14 @@ public class CommunityController {
     }
 
     // 댓글 쓰기
-    @PostMapping("/post/comment")
-    public ResponseEntity<ApiResponse<CommentResponseDto>> createComment(@AuthenticationPrincipal CustomUserDetails user, @RequestBody CommentRequestDto dto) {
-        CommentResponseDto result = communityService.createComment(user, dto);
+    @PostMapping("/post/{postId}/comment")
+    public ResponseEntity<ApiResponse<CommentResponseDto>> createComment(@AuthenticationPrincipal CustomUserDetails user,@PathVariable Long postId ,@RequestBody CommentRequestDto dto) {
+        CommentResponseDto result = communityService.createComment(user, postId, dto);
 
         return ResponseEntity.ok(ApiResponse.success("댓글 작성 완료", result));
     }
 
-
+    // 댓글 조회
     @GetMapping("/post/{postId}/comments")
     public ResponseEntity<ApiResponse<List<CommentResponseDto>>> getComment(@PathVariable Long postId) {
         List<CommentResponseDto> result = communityService.getComment(postId);

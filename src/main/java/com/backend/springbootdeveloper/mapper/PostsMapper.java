@@ -1,6 +1,7 @@
 package com.backend.springbootdeveloper.mapper;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
+import com.backend.springbootdeveloper.domain.post.Comment;
 import com.backend.springbootdeveloper.dto.CommentRequestDto;
 import com.backend.springbootdeveloper.dto.CommentResponseDto;
 import com.backend.springbootdeveloper.dto.PostsRequestDto;
@@ -22,7 +23,7 @@ public interface PostsMapper {
 
     void increaseViewCount(Long postId);
 
-    int createComment(CommentRequestDto dto);
+    int createComment(Comment comment);
 
     List<CommentResponseDto> getComment(Long postId);
 }

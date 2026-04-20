@@ -79,7 +79,7 @@
         WHERE post_id = #{postId}
     </update>
 
-    <insert id="createComment" parameterType="com.backend.springbootdeveloper.dto.CommentRequestDto">
+    <insert id="createComment" parameterType="com.backend.springbootdeveloper.domain.post.Comment" useGeneratedKeys="true" keyProperty="commentId">
         insert into comments (
             post_id,
             user_id,

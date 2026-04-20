@@ -1,6 +1,7 @@
 package com.backend.springbootdeveloper.service;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
+import com.backend.springbootdeveloper.domain.post.Comment;
 import com.backend.springbootdeveloper.dto.CommentRequestDto;
 import com.backend.springbootdeveloper.dto.CommentResponseDto;
 import com.backend.springbootdeveloper.dto.PostsRequestDto;
@@ -41,18 +42,24 @@ public class CommunityService {
 
     }
 
-    public CommentResponseDto createComment(CustomUserDetails user, CommentRequestDto dto) {
-        dto.setUserId(user.getUserId());
+    public CommentResponseDto   createComment(CustomUserDetails user,Long postId, CommentRequestDto dto) {
+        // Entity 생성
+        Comment comment = new Comment();
+        comment.setUserId(user.getUserId());
+        comment.setPostId(postId);
+        comment.setContent(dto.getContent());
+        comment.setCreatedAt(new Date());
 
-        postsMapper.createComment(dto);
+        // DB 저장
+        postsMapper.createComment(comment);
 
-        // 프론트엔드에 보낼 dto
+        // 응답 DTO 생성
         CommentResponseDto result = new CommentResponseDto();
-        result.setCommentId(dto.getCommentId());
-        result.setUserId(dto.getUserId());
-        result.setPostId(dto.getPostId());
-        result.setContent(dto.getContent());
-        result.setCreatedAt(new Date());
+        result.setCommentId(comment.getCommentId());
+        result.setUserId(comment.getUserId());
+        result.setPostId(comment.getPostId());
+        result.setContent(comment.getContent());
+        result.setCreatedAt(comment.getCreatedAt());
 
         return result;
     }
