@@ -9,6 +9,7 @@ import com.backend.springbootdeveloper.dto.PostsResponseDto;
 import com.backend.springbootdeveloper.mapper.PostsMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -42,6 +43,7 @@ public class CommunityService {
 
     }
 
+    @Transactional
     public CommentResponseDto   createComment(CustomUserDetails user,Long postId, CommentRequestDto dto) {
         // Entity 생성
         Comment comment = new Comment();
@@ -52,6 +54,9 @@ public class CommunityService {
 
         // DB 저장
         postsMapper.createComment(comment);
+
+        // 댓글 수 증가
+        postsMapper.increaseComment(postId);
 
         // 응답 DTO 생성
         CommentResponseDto result = new CommentResponseDto();

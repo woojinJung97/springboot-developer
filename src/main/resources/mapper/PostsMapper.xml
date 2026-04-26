@@ -64,7 +64,7 @@
                p.category,
                p.region,
                p.view_count,
-               p.comment_count,
+               (select count(*) from comments c where c.post_id = p.post_id) as comment_count,
                p.created_at,
                p.updated_at,
                p.is_deleted
@@ -103,4 +103,10 @@
         where c.post_id = #{postId}
         order by c.created_at desc
     </select>
+
+    <update id="increaseComment">
+        UPDATE posts
+        SET comment_count = comment_count + 1
+        WHERE post_id = #{postId}
+    </update>
 </mapper>

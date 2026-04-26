@@ -26,4 +26,6 @@ public interface PostsMapper {
     int createComment(Comment comment);
 
     List<CommentResponseDto> getComment(Long postId);
+
+    void increaseComment(Long postId);
 }
