@@ -20,45 +20,35 @@ public class CommunityService {
 
     private final PostsMapper postsMapper;
 
+    // 게시글 목록 반환 — 페이지네이션·키워드 검색 조건 적용
     public List<PostsResponseDto> getPostsList(PostsRequestDto dto) {
-        List<PostsResponseDto> result = postsMapper.getPostsList(dto);
-
-        return result;
+        return postsMapper.getPostsList(dto);
     }
 
+    // 로그인 유저 ID를 게시글 DTO에 설정 후 저장
     public void createPosts(CustomUserDetails user, PostsResponseDto dto) {
         dto.setUserId(user.getUserId());
-
         postsMapper.createPosts(dto);
-
     }
 
+    // 조회수 1 증가 후 게시글 상세 정보 반환
     public PostsResponseDto getPostsDetails(Long postId) {
-        // 조회수 증가
         postsMapper.increaseViewCount(postId);
-
-        PostsResponseDto result = postsMapper.getPostsDetails(postId);
-
-        return result;
-
+        return postsMapper.getPostsDetails(postId);
     }
 
+    // 댓글 저장 + 해당 게시글 댓글 수 1 증가 (트랜잭션으로 묶음)
     @Transactional
-    public CommentResponseDto   createComment(CustomUserDetails user,Long postId, CommentRequestDto dto) {
-        // Entity 생성
+    public CommentResponseDto createComment(CustomUserDetails user, Long postId, CommentRequestDto dto) {
         Comment comment = new Comment();
         comment.setUserId(user.getUserId());
         comment.setPostId(postId);
         comment.setContent(dto.getContent());
         comment.setCreatedAt(new Date());
 
-        // DB 저장
         postsMapper.createComment(comment);
-
-        // 댓글 수 증가
         postsMapper.increaseComment(postId);
 
-        // 응답 DTO 생성
         CommentResponseDto result = new CommentResponseDto();
         result.setCommentId(comment.getCommentId());
         result.setUserId(comment.getUserId());
@@ -69,8 +59,8 @@ public class CommunityService {
         return result;
     }
 
+    // 특정 게시글의 댓글 목록 반환 (최신순)
     public List<CommentResponseDto> getComment(Long postId) {
-
         return postsMapper.getComment(postId);
     }
 }

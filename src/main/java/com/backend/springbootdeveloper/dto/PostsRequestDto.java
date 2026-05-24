@@ -13,4 +13,9 @@ public class PostsRequestDto {
     private int pageSize;
     private String keyword;
 
+    public int getOffset() {
+        int p = page < 1 ? 1 : page;
+        int size = pageSize < 1 ? 10 : pageSize;
+        return (p - 1) * size;
+    }
 }

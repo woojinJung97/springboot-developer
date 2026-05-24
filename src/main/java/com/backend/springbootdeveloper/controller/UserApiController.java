@@ -27,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -44,6 +43,7 @@ public class UserApiController {
     @Value("${app.secure-cookie:false}")
     private boolean secureCookie;
 
+    // 이메일/비밀번호 로그인 — JWT 액세스 토큰 반환 + 리프레시 토큰을 HttpOnly 쿠키에 저장
     @PostMapping("/api/login")
     public ResponseEntity<?> login(@RequestBody Map<String, Object> request) throws IllegalAccessException {
         String email = request.get("email").toString();
@@ -55,22 +55,20 @@ public class UserApiController {
             throw new IllegalAccessException("비밀번호가 일치하지 않습니다.");
         }
 
-        // JWT 생성
         String accessToken = tokenProvider.generateAccessToken(user);
         String refreshToken = tokenProvider.generateAccessToken(user);
 
-        // DB에 Refresh Token 저장
         refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
 
         boolean isProd = secureCookie;
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(isProd)              // 개발(HTTP)이면 false, 프로덕션(HTTPS)이면 true
+                .secure(isProd)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
-                .sameSite(isProd ? "None" : "Lax") // 로컬 테스트 시 Lax 권장
+                .sameSite(isProd ? "None" : "Lax")
                 .build();
-        // 응답 구성
+
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Login Success");
         response.put("user", user.getEmail());
@@ -81,6 +79,7 @@ public class UserApiController {
                 .body(response);
     }
 
+    // 현재 로그인한 사용자의 이메일·닉네임 반환 (헤더 표시용 간략 정보)
     @GetMapping("/api/me")
     public ResponseEntity<?> getMe(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -93,11 +92,9 @@ public class UserApiController {
         if (principal instanceof User) {
             user = (User) principal;
         } else if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            user = userService.findByEmail(username);
+            user = userService.findByEmail(((UserDetails) principal).getUsername());
         } else if (principal instanceof String) {
-            String username = (String) principal;
-            user = userService.findByEmail(username);
+            user = userService.findByEmail((String) principal);
         }
 
         if (user == null) {
@@ -112,14 +109,14 @@ public class UserApiController {
         ));
     }
 
+    // 로그아웃 — SecurityContext 초기화 및 리프레시 토큰 쿠키 만료 처리
     @PostMapping("/api/logout")
     public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
 
-        // HttpOnly refresh cookie 삭제(만료)
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(true) // HTTPS 환경이면 true
+                .secure(true)
                 .path("/")
                 .maxAge(0)
                 .sameSite("None")
@@ -128,51 +125,52 @@ public class UserApiController {
 
         return ResponseEntity.ok(new ApiResponse<>(200, "Logout success", null));
     }
-    
+
+    // 회원가입 — 이메일·닉네임 중복 확인 후 BCrypt 암호화하여 계정 생성
     @PostMapping("/api/signup")
     public ResponseEntity<ApiResponse<?>> signup(@RequestBody AddUserRequest request) {
         userService.signup(request);
         return ResponseEntity.ok(ApiResponse.success("회원가입 성공", null));
     }
 
-    // 이메일 중복 확인
+    // 이메일 중복 확인 — 회원가입 폼 실시간 검증용
     @GetMapping("/api/check-email")
     public ResponseEntity<?> checkEmail(@RequestParam String email) {
         boolean exists = userMapper.existsByEmail(email);
-        return ResponseEntity.ok(Map.of("available", !exists,
-                "message", exists ? "이미 사용중인 이메일입니다." : "사용 가능한 이메일입니다."));
+        return ResponseEntity.ok(Map.of(
+                "available", !exists,
+                "message", exists ? "이미 사용중인 이메일입니다." : "사용 가능한 이메일입니다."
+        ));
     }
 
-    // 닉네임 중복 확인
+    // 닉네임 중복 확인 — 회원가입 폼 실시간 검증용
     @GetMapping("/api/check-nickname")
     public ResponseEntity<?> checkNickname(@RequestParam String nickname) {
         boolean exists = userMapper.existsByNickname(nickname);
-        return ResponseEntity.ok(Map.of("available", !exists,
-                "message", exists ? "이미 사용중인 닉네임입니다." : "사용 가능한 닉네임입니다."));
+        return ResponseEntity.ok(Map.of(
+                "available", !exists,
+                "message", exists ? "이미 사용중인 닉네임입니다." : "사용 가능한 닉네임입니다."
+        ));
     }
 
-    // 내 정보 조회
+    // 마이페이지 조회 — 로그인 유저의 전체 프로필 정보 반환 (등급, 가입일 포함)
     @GetMapping("/api/users/myhome")
     public ResponseEntity<ApiResponse<UserResponseDto>> getMyHome(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUserId();
-        UserResponseDto result = userService.getMyHome(userId);
-
+        UserResponseDto result = userService.getMyHome(userDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success("회원 정보 조회 성공", result));
     }
 
-    // 회원정보 수정
+    // 마이페이지 수정 — 닉네임·비밀번호 등 프로필 정보 변경 (비밀번호는 재암호화)
     @PatchMapping("/api/users/myhome")
-    public ResponseEntity<ApiResponse<UserResponseDto>> updatedUser(@AuthenticationPrincipal CustomUserDetails user,@RequestBody UserRequestDto dto) {
+    public ResponseEntity<ApiResponse<UserResponseDto>> updatedUser(@AuthenticationPrincipal CustomUserDetails user, @RequestBody UserRequestDto dto) {
         UserResponseDto result = userService.updatedUser(user, dto);
         return ResponseEntity.ok(ApiResponse.success("회원정보 수정 완료", result));
     }
 
-    // 회원 탈퇴
+    // 회원 탈퇴 — 본인 계정만 삭제 가능
     @DeleteMapping("/api/users/myhome/{userId}")
     public ResponseEntity<ApiResponse<?>> deleteUser(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long userId) {
         userService.deleteUser(user, userId);
-
         return ResponseEntity.noContent().build();
     }
-
 }

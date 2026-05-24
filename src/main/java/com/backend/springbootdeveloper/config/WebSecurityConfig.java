@@ -4,6 +4,7 @@ import com.backend.springbootdeveloper.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -46,10 +47,17 @@ public class WebSecurityConfig {
                 // ✅ 기본 폼 로그인 / 세션 로그인 비활성화 (Vue가 직접 API 호출할 거니까)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                // ✅ 허용할 URL 지정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers( "/login", "/api/login", "/api/signup" , "/api/signup", "/user", "/css/**", "/js/**", "/api/check-email", "/api/check-nickname", "/api/**").permitAll()
-                        .requestMatchers("/api/train/**", "/api/users/**").permitAll()
+                        // 정적 리소스
+                        .requestMatchers("/css/**", "/js/**", "/static/**").permitAll()
+                        // 인증 API (공개)
+                        .requestMatchers(HttpMethod.POST, "/api/login", "/api/signup", "/api/token").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/check-email", "/api/check-nickname").permitAll()
+                        // 기차 조회 (읽기만 공개)
+                        .requestMatchers(HttpMethod.GET, "/api/train/search", "/api/train/detail", "/api/train/train-station", "/api/train/seat-info").permitAll()
+                        // 커뮤니티 읽기 (공개)
+                        .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/*", "/api/posts/*/comments").permitAll()
+                        // 나머지 모두 인증 필요
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),

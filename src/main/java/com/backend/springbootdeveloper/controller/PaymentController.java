@@ -5,6 +5,7 @@ import com.backend.springbootdeveloper.dto.PaymentDto;
 import com.backend.springbootdeveloper.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,15 +17,15 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @RequestMapping("/confirm")
+    // 토스페이먼츠 결제 승인 — Toss API 호출 후 주문·결제 정보를 DB에 저장
+    @PostMapping("/confirm")
     public ResponseEntity<ApiResponse<String>> confirmPayment(@RequestBody PaymentDto dto) {
         try {
             paymentService.confirmPayment(dto);
-            return ResponseEntity.ok(new ApiResponse<>(200,"결제 성공", "OK"));
+            return ResponseEntity.ok(new ApiResponse<>(200, "결제 성공", "OK"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ApiResponse<>(500, "결제 실패", null));
         }
     }
-
 }
