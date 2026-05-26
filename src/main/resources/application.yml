@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/travel_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
-    username: ${DB_USERNAME:travel_user}
-    password: ${DB_PASSWORD:travel1234}
+    url: jdbc:mysql://mysql-19c73069-wjddnwls9709-b003.a.aivencloud.com:25383/travel_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=true&trustServerCertificate=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml
