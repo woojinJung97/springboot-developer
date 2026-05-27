@@ -51,4 +51,17 @@ public class CommunityController {
         List<CommentResponseDto> result = communityService.getComment(postId);
         return ResponseEntity.ok(ApiResponse.success("댓글 조회 성공", result));
     }
+
+    @GetMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<LikesResponseDto>> getLikes(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long postId) {
+        LikesResponseDto result = communityService.getLikes(user, postId);
+        return ResponseEntity.ok(ApiResponse.success("좋아요 동작 성공", result));
+    }
+
+    /*
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<List<CommentResponseDto>>> increaseLikes(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long postId) {
+        List<CommentResponseDto> result = communityService.increaseLikes(user, postId);
+        return ResponseEntity.ok(ApiResponse.success("좋아요 동작 성공", result));
+    }*/
 }

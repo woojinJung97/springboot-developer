@@ -2,10 +2,7 @@ package com.backend.springbootdeveloper.service;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.domain.post.Comment;
-import com.backend.springbootdeveloper.dto.CommentRequestDto;
-import com.backend.springbootdeveloper.dto.CommentResponseDto;
-import com.backend.springbootdeveloper.dto.PostsRequestDto;
-import com.backend.springbootdeveloper.dto.PostsResponseDto;
+import com.backend.springbootdeveloper.dto.*;
 import com.backend.springbootdeveloper.mapper.PostsMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -62,5 +59,14 @@ public class CommunityService {
     // 특정 게시글의 댓글 목록 반환 (최신순)
     public List<CommentResponseDto> getComment(Long postId) {
         return postsMapper.getComment(postId);
+    }
+
+    public LikesResponseDto getLikes(CustomUserDetails user, Long postId) {
+        // 현재 좋아요 정보 조회
+        LikesResponseDto dto = new LikesResponseDto();
+        dto.setUserId(user.getUserId());
+        dto.setPostId(postId);
+
+        return postsMapper.getLikes(dto);
     }
 }

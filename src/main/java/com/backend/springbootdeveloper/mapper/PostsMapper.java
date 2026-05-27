@@ -2,10 +2,7 @@ package com.backend.springbootdeveloper.mapper;
 
 import com.backend.springbootdeveloper.config.auth.CustomUserDetails;
 import com.backend.springbootdeveloper.domain.post.Comment;
-import com.backend.springbootdeveloper.dto.CommentRequestDto;
-import com.backend.springbootdeveloper.dto.CommentResponseDto;
-import com.backend.springbootdeveloper.dto.PostsRequestDto;
-import com.backend.springbootdeveloper.dto.PostsResponseDto;
+import com.backend.springbootdeveloper.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +25,6 @@ public interface PostsMapper {
     List<CommentResponseDto> getComment(Long postId);
 
     void increaseComment(Long postId);
+
+    LikesResponseDto getLikes(LikesResponseDto dto);
 }

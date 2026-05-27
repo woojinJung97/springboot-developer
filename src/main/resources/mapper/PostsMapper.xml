@@ -73,6 +73,13 @@
         where p.post_id = #{postId}
     </select>
 
+    <select id="getLikes" parameterType="long" resultType="com.backend.springbootdeveloper.dto.LikesResponseDto">
+      select post_id, user_id , (SELECT COUNT(1) FROM post_likes WHERE post_id = #{postId}) as totalLikeCount
+        from post_likes
+       where 1=1
+         and post_id = #{postId}
+         and user_id = #{userId}
+    </select>
     <update id="increaseViewCount" parameterType="long">
         UPDATE posts
         SET view_count = view_count + 1
